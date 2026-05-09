@@ -289,34 +289,99 @@
             position:relative;
             overflow:hidden;
         }
-        #hero-canvas { position:absolute; inset:0; z-index:0; }
-
-        .orb {
-            position:absolute;
-            border-radius:50%;
-            filter:blur(80px);
+        #hero::before {
+            content:'';
+            position:absolute; inset:0;
+            background:
+                radial-gradient(ellipse 55% 60% at 5% 55%, rgba(0,224,255,.05) 0%, transparent 70%),
+                radial-gradient(ellipse 45% 50% at 95% 15%, rgba(168,85,247,.04) 0%, transparent 70%);
             pointer-events:none;
-            z-index:0;
-        }
-        .orb-1 {
-            width:640px; height:640px;
-            background:radial-gradient(circle, rgba(0,224,255,.10) 0%, transparent 70%);
-            top:-120px; right:-80px;
-            animation:orb-float 9s ease-in-out infinite;
-        }
-        .orb-2 {
-            width:480px; height:480px;
-            background:radial-gradient(circle, rgba(168,85,247,.09) 0%, transparent 70%);
-            bottom:0; left:160px;
-            animation:orb-float 11s ease-in-out infinite reverse;
-        }
-        @keyframes orb-float {
-            0%,100% { transform:translate(0,0) scale(1); }
-            33%      { transform:translate(28px,-18px) scale(1.04); }
-            66%      { transform:translate(-16px,22px) scale(.96); }
         }
 
-        .hero-content { position:relative; z-index:1; max-width:780px; }
+        /* Two-column split layout */
+        .hero-grid {
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:56px;
+            align-items:center;
+            width:100%;
+        }
+
+        .hero-content { position:relative; z-index:1; }
+
+        /* Right-side visual panel */
+        .hero-visual {
+            position:relative;
+            z-index:1;
+            height:540px;
+        }
+        .canvas-wrap {
+            width:100%; height:100%;
+            border-radius:var(--r-lg);
+            border:1px solid rgba(0,224,255,.18);
+            background:rgba(0,224,255,.02);
+            overflow:hidden;
+            position:relative;
+            box-shadow:
+                0 0 0 1px rgba(0,224,255,.05),
+                0 24px 80px rgba(0,224,255,.10),
+                inset 0 0 100px rgba(0,224,255,.03);
+        }
+        #hero-canvas { width:100%; height:100%; display:block; }
+
+        /* Corner bracket decorations */
+        .c-corner {
+            position:absolute;
+            width:18px; height:18px;
+            border-color:var(--teal);
+            border-style:solid;
+            opacity:.5;
+            pointer-events:none;
+        }
+        .c-corner.tl { top:12px;    left:12px;  border-width:2px 0 0 2px; border-radius:4px 0 0 0; }
+        .c-corner.tr { top:12px;    right:12px; border-width:2px 2px 0 0; border-radius:0 4px 0 0; }
+        .c-corner.bl { bottom:12px; left:12px;  border-width:0 0 2px 2px; border-radius:0 0 0 4px; }
+        .c-corner.br { bottom:12px; right:12px; border-width:0 2px 2px 0; border-radius:0 0 4px 0; }
+
+        /* Scan line sweep */
+        .canvas-scan {
+            position:absolute;
+            left:0; right:0; height:1px;
+            background:linear-gradient(90deg, transparent, rgba(0,224,255,.45), transparent);
+            animation:scan-line 5s linear infinite;
+            pointer-events:none;
+        }
+        @keyframes scan-line {
+            0%   { top:0%;   opacity:0; }
+            4%   { opacity:1; }
+            96%  { opacity:1; }
+            100% { top:100%; opacity:0; }
+        }
+
+        /* Live badge */
+        .canvas-badge {
+            position:absolute;
+            bottom:14px; left:50%;
+            transform:translateX(-50%);
+            display:flex; align-items:center; gap:6px;
+            padding:5px 14px;
+            background:rgba(5,12,21,.85);
+            border:1px solid rgba(0,224,255,.2);
+            border-radius:var(--r-full);
+            font-family:var(--mono);
+            font-size:10px;
+            color:var(--teal);
+            letter-spacing:.14em;
+            pointer-events:none;
+            white-space:nowrap;
+            backdrop-filter:blur(8px);
+        }
+        .canvas-badge .pulse-dot {
+            width:6px; height:6px;
+            background:var(--teal);
+            border-radius:50%;
+            animation:pulse-dot 2s ease-in-out infinite;
+        }
 
         .hero-badge {
             display:inline-flex;
@@ -340,9 +405,9 @@
 
         .hero-title {
             font-family:var(--head);
-            font-size:clamp(44px,7.5vw,88px);
+            font-size:clamp(36px,5.5vw,72px);
             font-weight:700;
-            line-height:1.04;
+            line-height:1.06;
             letter-spacing:-.025em;
             margin-bottom:24px;
         }
@@ -356,29 +421,28 @@
         }
 
         .hero-sub {
-            font-size:clamp(16px,2.2vw,20px);
+            font-size:clamp(15px,1.8vw,18px);
             color:var(--text-2);
-            margin-bottom:48px;
-            max-width:560px;
-            line-height:1.65;
+            margin-bottom:40px;
+            line-height:1.68;
         }
 
-        .hero-cta { display:flex; flex-wrap:wrap; gap:16px; margin-bottom:64px; }
+        .hero-cta { display:flex; flex-wrap:wrap; gap:16px; margin-bottom:48px; }
 
         .hero-stats {
             display:flex;
-            gap:48px;
-            padding-top:48px;
+            gap:36px;
+            padding-top:36px;
             border-top:1px solid var(--border);
         }
         .stat-num {
             font-family:var(--head);
-            font-size:28px;
+            font-size:26px;
             font-weight:700;
             color:var(--teal);
         }
         .stat-label {
-            font-size:12px;
+            font-size:11px;
             color:var(--text-3);
             margin-top:4px;
         }
@@ -806,13 +870,16 @@
         @media (max-width:900px) {
             .nav-links, .nav-cta .btn { display:none; }
             .hamburger { display:flex; }
+            .hero-grid { grid-template-columns:1fr; }
+            .hero-visual { height:360px; }
             .about-grid, .contact-grid { grid-template-columns:1fr; gap:48px; }
             .process-wrap { grid-template-columns:1fr 1fr; gap:32px; }
             .process-wrap::before { display:none; }
         }
         @media (max-width:640px) {
             section { padding:72px 0; }
-            .hero-stats { gap:28px; }
+            .hero-visual { height:280px; }
+            .hero-stats { gap:24px; }
             .process-wrap { grid-template-columns:1fr; gap:24px; }
             .flow-box { font-size:11px; padding:6px 10px; }
             .footer-inner { flex-direction:column; align-items:flex-start; }
@@ -860,46 +927,63 @@
      HERO
 ====================================================== -->
 <section id="hero">
-    <canvas id="hero-canvas"></canvas>
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
-
     <div class="container">
-        <div class="hero-content">
-            <div class="hero-badge reveal">
-                <span class="badge-icon">⚡</span>
-                AI Automation for Modern Businesses
+        <div class="hero-grid">
+
+            <!-- LEFT: text content -->
+            <div class="hero-content">
+                <div class="hero-badge reveal">
+                    <span class="badge-icon">⚡</span>
+                    AI Automation for Modern Businesses
+                </div>
+
+                <h1 class="hero-title reveal d1">
+                    <span class="line-1">Build Smarter.</span>
+                    <span class="line-2">Automate Everything.</span>
+                </h1>
+
+                <p class="hero-sub reveal d2">
+                    Custom AI agents and intelligent workflows that optimize your operations,
+                    capture leads on autopilot, and free your team to focus on what matters most.
+                </p>
+
+                <div class="hero-cta reveal d3">
+                    <a href="#contact" class="btn btn-primary">✦ Book a Strategy Call</a>
+                    <a href="#portfolio" class="btn btn-outline">See How It Works →</a>
+                </div>
+
+                <div class="hero-stats reveal d4">
+                    <div>
+                        <div class="stat-num" data-count="40">0</div>
+                        <div class="stat-label">Hours saved / week avg.</div>
+                    </div>
+                    <div>
+                        <div class="stat-num" data-count="70">0</div>
+                        <div class="stat-label">% reduction in manual work</div>
+                    </div>
+                    <div>
+                        <div class="stat-num" data-count="24">0</div>
+                        <div class="stat-label">/7 AI agent uptime</div>
+                    </div>
+                </div>
             </div>
 
-            <h1 class="hero-title reveal d1">
-                <span class="line-1">Build Smarter.</span>
-                <span class="line-2">Automate Everything.</span>
-            </h1>
-
-            <p class="hero-sub reveal d2">
-                Custom AI agents and intelligent workflows that optimize your operations,
-                capture leads on autopilot, and free your team to focus on what matters most.
-            </p>
-
-            <div class="hero-cta reveal d3">
-                <a href="#contact" class="btn btn-primary">✦ Book a Strategy Call</a>
-                <a href="#portfolio" class="btn btn-outline">See How It Works →</a>
-            </div>
-
-            <div class="hero-stats reveal d4">
-                <div>
-                    <div class="stat-num" data-count="40">0</div>
-                    <div class="stat-label">Hours saved / week avg.</div>
-                </div>
-                <div>
-                    <div class="stat-num" data-count="70">0</div>
-                    <div class="stat-label">% reduction in manual work</div>
-                </div>
-                <div>
-                    <div class="stat-num" data-count="24">0</div>
-                    <div class="stat-label">/7 AI agent uptime</div>
+            <!-- RIGHT: node-network visual panel -->
+            <div class="hero-visual reveal d2">
+                <div class="canvas-wrap">
+                    <canvas id="hero-canvas"></canvas>
+                    <div class="c-corner tl"></div>
+                    <div class="c-corner tr"></div>
+                    <div class="c-corner bl"></div>
+                    <div class="c-corner br"></div>
+                    <div class="canvas-scan"></div>
+                    <div class="canvas-badge">
+                        <span class="pulse-dot"></span>
+                        LIVE AI NETWORK
+                    </div>
                 </div>
             </div>
+
         </div>
     </div>
 </section>
@@ -1359,106 +1443,180 @@ function closeMob() {
 (function () {
     const canvas = document.getElementById('hero-canvas');
     const ctx    = canvas.getContext('2d');
-    let W, H, nodes = [];
+    let W, H, floaters = [], hubs = [];
 
-    const CFG = {
-        count:   65,
-        maxDist: 160,
-        speed:   0.38,
-        radius:  2.2,
-    };
+    /* Hub node definitions — placed proportionally inside the panel */
+    const HUB_DEFS = [
+        { label: 'AI Agent',     fx: .50, fy: .42, rgb: [0,  224, 255] },
+        { label: 'Lead Capture', fx: .18, fy: .22, rgb: [168, 85, 247] },
+        { label: 'CRM Sync',     fx: .82, fy: .22, rgb: [168, 85, 247] },
+        { label: 'Email Flow',   fx: .18, fy: .75, rgb: [0,  224, 255] },
+        { label: 'Support Bot',  fx: .82, fy: .75, rgb: [0,  224, 255] },
+        { label: 'Analytics',    fx: .50, fy: .88, rgb: [16, 185, 129] },
+    ];
+
+    const CFG = { count: 48, maxDist: 210, speed: 0.30, radius: 3.4 };
 
     function resize() {
         W = canvas.width  = canvas.offsetWidth;
         H = canvas.height = canvas.offsetHeight;
+        hubs.forEach((h, i) => {
+            h.bx = HUB_DEFS[i].fx * W;
+            h.by = HUB_DEFS[i].fy * H;
+        });
     }
 
-    class Node {
+    /* --- Floating background nodes --- */
+    class Floater {
         constructor() { this.reset(); }
         reset() {
             this.x  = Math.random() * W;
             this.y  = Math.random() * H;
             this.vx = (Math.random() - .5) * CFG.speed;
             this.vy = (Math.random() - .5) * CFG.speed;
-            this.r  = Math.random() * CFG.radius + .8;
-            this.a  = Math.random() * .45 + .15;
+            this.r  = Math.random() * CFG.radius + 1.2;
+            this.a  = Math.random() * .5 + .18;
             this.ph = Math.random() * Math.PI * 2;
         }
         update() {
             this.x  += this.vx;
             this.y  += this.vy;
-            this.ph += 0.018;
+            this.ph += 0.02;
             if (this.x < 0 || this.x > W) this.vx *= -1;
             if (this.y < 0 || this.y > H) this.vy *= -1;
         }
         draw() {
-            const a = this.a * (.7 + .3 * Math.sin(this.ph));
-            /* core dot */
+            const a = this.a * (.6 + .4 * Math.sin(this.ph));
             ctx.beginPath();
             ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
             ctx.fillStyle = `rgba(0,224,255,${a})`;
             ctx.fill();
-            /* soft glow ring */
             ctx.beginPath();
-            ctx.arc(this.x, this.y, this.r * 2.8, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(0,224,255,${a * .12})`;
+            ctx.arc(this.x, this.y, this.r * 4, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(0,224,255,${a * .07})`;
             ctx.fill();
         }
     }
 
-    let mouse = { x: -1e4, y: -1e4 };
-    window.addEventListener('mousemove', e => {
-        const r  = canvas.getBoundingClientRect();
-        mouse.x  = e.clientX - r.left;
-        mouse.y  = e.clientY - r.top;
-    });
+    /* --- Hub nodes (labeled, larger, orbiting gently) --- */
+    class Hub {
+        constructor(def) {
+            this.label = def.label;
+            this.rgb   = def.rgb;
+            this.bx    = def.fx * W;
+            this.by    = def.fy * H;
+            this.x     = this.bx;
+            this.y     = this.by;
+            this.ox    = Math.random() * Math.PI * 2;
+            this.oy    = Math.random() * Math.PI * 2;
+            this.ph    = Math.random() * Math.PI * 2;
+        }
+        update(t) {
+            this.x  = this.bx + Math.sin(t * .00042 + this.ox) * 14;
+            this.y  = this.by + Math.cos(t * .00031 + this.oy) * 11;
+            this.ph += 0.014;
+        }
+        draw() {
+            const [r,g,b] = this.rgb;
+            const p = .72 + .28 * Math.sin(this.ph);
 
-    function loop() {
+            /* outer halo */
+            const halo = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, 40);
+            halo.addColorStop(0,  `rgba(${r},${g},${b},${.20 * p})`);
+            halo.addColorStop(1,  `rgba(${r},${g},${b},0)`);
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, 40, 0, Math.PI * 2);
+            ctx.fillStyle = halo;
+            ctx.fill();
+
+            /* pulsing ring */
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, 16 * p, 0, Math.PI * 2);
+            ctx.strokeStyle = `rgba(${r},${g},${b},${.45 * p})`;
+            ctx.lineWidth = 1.2;
+            ctx.stroke();
+
+            /* core dot */
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, 8, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(${r},${g},${b},${.95 * p})`;
+            ctx.fill();
+
+            /* centre spark */
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, 3.5, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255,255,255,.95)';
+            ctx.fill();
+
+            /* label */
+            ctx.font = `500 10px 'JetBrains Mono', monospace`;
+            ctx.fillStyle = `rgba(${r},${g},${b},${.88 * p})`;
+            ctx.textAlign = 'center';
+            ctx.fillText(this.label, this.x, this.y + 28);
+        }
+    }
+
+    /* Mouse tracks only inside canvas */
+    let mouse = { x: -1e4, y: -1e4 };
+    canvas.addEventListener('mousemove', e => {
+        const rect = canvas.getBoundingClientRect();
+        mouse.x = e.clientX - rect.left;
+        mouse.y = e.clientY - rect.top;
+    });
+    canvas.addEventListener('mouseleave', () => { mouse.x = -1e4; mouse.y = -1e4; });
+
+    function loop(ts) {
         ctx.clearRect(0, 0, W, H);
 
-        for (let i = 0; i < nodes.length; i++) {
-            /* node-to-node lines */
-            for (let j = i + 1; j < nodes.length; j++) {
-                const dx   = nodes[i].x - nodes[j].x;
-                const dy   = nodes[i].y - nodes[j].y;
-                const dist = Math.hypot(dx, dy);
+        hubs.forEach(h => h.update(ts));
+
+        const all = [...floaters, ...hubs];
+
+        /* connections */
+        for (let i = 0; i < all.length; i++) {
+            for (let j = i + 1; j < all.length; j++) {
+                const dist = Math.hypot(all[i].x - all[j].x, all[i].y - all[j].y);
                 if (dist < CFG.maxDist) {
-                    const a = (1 - dist / CFG.maxDist) * .22;
+                    const hubConn = (all[i] instanceof Hub || all[j] instanceof Hub);
+                    const a = (1 - dist / CFG.maxDist) * (hubConn ? .38 : .18);
                     ctx.beginPath();
-                    ctx.moveTo(nodes[i].x, nodes[i].y);
-                    ctx.lineTo(nodes[j].x, nodes[j].y);
-                    ctx.strokeStyle = `rgba(0,224,255,${a})`;
-                    ctx.lineWidth   = .7;
+                    ctx.moveTo(all[i].x, all[i].y);
+                    ctx.lineTo(all[j].x, all[j].y);
+                    ctx.strokeStyle = hubConn
+                        ? `rgba(0,224,255,${a})`
+                        : `rgba(0,224,255,${a})`;
+                    ctx.lineWidth = hubConn ? 1.1 : .65;
                     ctx.stroke();
                 }
             }
-            /* mouse interaction lines */
-            const mdx  = nodes[i].x - mouse.x;
-            const mdy  = nodes[i].y - mouse.y;
-            const mdist = Math.hypot(mdx, mdy);
-            if (mdist < 130) {
-                const a = (1 - mdist / 130) * .45;
+            /* mouse beam */
+            const md = Math.hypot(all[i].x - mouse.x, all[i].y - mouse.y);
+            if (md < 160) {
+                const a = (1 - md / 160) * .6;
                 ctx.beginPath();
-                ctx.moveTo(nodes[i].x, nodes[i].y);
+                ctx.moveTo(all[i].x, all[i].y);
                 ctx.lineTo(mouse.x, mouse.y);
                 ctx.strokeStyle = `rgba(168,85,247,${a})`;
-                ctx.lineWidth   = .7;
+                ctx.lineWidth = 1;
                 ctx.stroke();
             }
         }
 
-        nodes.forEach(n => { n.update(); n.draw(); });
+        floaters.forEach(n => { n.update(); n.draw(); });
+        hubs.forEach(h => h.draw());
+
         requestAnimationFrame(loop);
     }
 
     function init() {
         resize();
-        nodes = Array.from({ length: CFG.count }, () => new Node());
-        loop();
+        floaters = Array.from({ length: CFG.count }, () => new Floater());
+        hubs     = HUB_DEFS.map(def => new Hub(def));
+        requestAnimationFrame(loop);
     }
 
     init();
-    window.addEventListener('resize', () => { resize(); nodes.forEach(n => n.reset()); });
+    window.addEventListener('resize', () => { resize(); floaters.forEach(n => n.reset()); });
 })();
 
 /* --- SCROLL REVEAL --- */
