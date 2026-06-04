@@ -1,36 +1,19 @@
 # Personal files — never deploy these
-*.csv
-*.mov
-*.MOV
-*.mp4
-*.MP4
-*.pdf
-*.PDF
-*.docx
-*.DOCX
-*.doc
-*.DOC
-*.zip
-*.rar
-*.psd
-
-# Images — block all except specific ones needed for the site
-*.jpg
-*.JPG
-!prajwal.jpg
-*.jpeg
-*.JPEG
-
-# Allow brand PNG assets and logo (needed for OG image, favicon, nav)
-*.png
-*.PNG
-!brand/logo-horizontal.png
-!brand/logo-mark.png
-!brand/logo-profile.png
-
-# Personal files at root
-apollo-contacts-export*.csv
+apollo-contacts-export.csv
+apollo-contacts-export (1).csv
+apollo-contacts-export (2).csv
 IMG_2419.MOV
 IMG_2420.JPG
 pasport.pdf
 twilio_2FA_recovery_code.txt
+Statement of Porpose_ Master in Data Science.docx
+WhatsApp Image 2026-04-16 at 12.24.32 PM.pdf
+
+# File type blockers for any other personal files
+*.mov
+*.MOV
+*.mp4
+*.MP4
+*.rar
+*.zip
+*.psd
