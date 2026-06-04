@@ -919,6 +919,151 @@
         .footer-links a:hover { color:var(--teal); }
 
         /* ===================================================
+           PROJECTS
+        =================================================== */
+        #projects { background: var(--bg-secondary); }
+
+        .proj-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        .proj-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--r-xl);
+            padding: 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            text-decoration: none;
+            color: var(--text-1);
+            transition: border-color var(--ease), box-shadow var(--ease);
+            position: relative;
+            overflow: hidden;
+            transform-style: preserve-3d;
+            will-change: transform;
+        }
+        .proj-card::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: linear-gradient(135deg, rgba(0,224,255,.05), transparent 60%);
+            opacity: 0;
+            transition: opacity var(--ease);
+            pointer-events: none;
+        }
+        .proj-card:hover {
+            border-color: rgba(0,224,255,.3);
+            box-shadow: 0 0 40px rgba(0,224,255,.1), 0 20px 60px rgba(0,0,0,.35);
+        }
+        .proj-card:hover::before { opacity: 1; }
+
+        .proj-card--soon {
+            border-style: dashed;
+            border-color: rgba(168,85,247,.25);
+            cursor: default;
+        }
+        .proj-card--soon:hover {
+            border-color: rgba(168,85,247,.45);
+            box-shadow: 0 0 40px rgba(168,85,247,.1), 0 20px 60px rgba(0,0,0,.35);
+        }
+        .proj-card--soon::before {
+            background: linear-gradient(135deg, rgba(168,85,247,.05), transparent 60%);
+        }
+
+        .proj-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .proj-tag {
+            font-family: var(--mono);
+            font-size: 10px;
+            letter-spacing: .16em;
+            text-transform: uppercase;
+            color: var(--teal);
+        }
+        .proj-tag--soon { color: var(--purple); }
+        .proj-arrow {
+            font-size: 18px;
+            color: var(--text-3);
+            transition: color var(--fast), transform var(--fast);
+            line-height: 1;
+        }
+        .proj-card:hover .proj-arrow {
+            color: var(--teal);
+            transform: translate(2px, -2px);
+        }
+
+        .proj-badge-soon {
+            font-family: var(--mono);
+            font-size: 9px;
+            letter-spacing: .2em;
+            text-transform: uppercase;
+            color: var(--purple);
+            background: rgba(168,85,247,.1);
+            border: 1px solid rgba(168,85,247,.25);
+            border-radius: var(--r-full);
+            padding: 3px 10px;
+            animation: badge-pulse 2.5s ease-in-out infinite;
+        }
+        @keyframes badge-pulse {
+            0%,100% { opacity: .7; }
+            50%      { opacity: 1; }
+        }
+
+        .proj-icon {
+            font-size: 32px;
+            line-height: 1;
+        }
+        .proj-name {
+            font-family: var(--head);
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: -.015em;
+            color: var(--text-1);
+        }
+        .proj-desc {
+            font-size: 13.5px;
+            color: var(--text-2);
+            line-height: 1.76;
+            flex: 1;
+        }
+        .proj-url {
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--text-3);
+            letter-spacing: .08em;
+            margin-top: 4px;
+            transition: color var(--fast);
+        }
+        .proj-card:hover .proj-url { color: var(--teal); }
+
+        .proj-wip {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--purple);
+            letter-spacing: .1em;
+            margin-top: 4px;
+        }
+        .wip-dot {
+            width: 7px; height: 7px;
+            background: var(--purple);
+            border-radius: 50%;
+            flex-shrink: 0;
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+
+        @media (max-width: 640px) {
+            .proj-grid { grid-template-columns: 1fr; }
+        }
+
+        /* ===================================================
            SCROLL REVEAL
         =================================================== */
         .reveal {
@@ -1007,6 +1152,7 @@
             <li><a href="#about">About</a></li>
             <li><a href="#services">Services</a></li>
             <li><a href="#portfolio">Portfolio</a></li>
+            <li><a href="#projects">Projects</a></li>
             <li><a href="#process">Process</a></li>
             <li><a href="#contact">Contact</a></li>
         </ul>
@@ -1023,6 +1169,7 @@
     <a href="#about"     onclick="closeMob()">About</a>
     <a href="#services"  onclick="closeMob()">Services</a>
     <a href="#portfolio" onclick="closeMob()">Portfolio</a>
+    <a href="#projects"  onclick="closeMob()">Projects</a>
     <a href="#process"   onclick="closeMob()">Process</a>
     <a href="#contact"   onclick="closeMob()">Contact</a>
     <a href="#contact" class="btn btn-primary" onclick="closeMob()">Book a Call</a>
@@ -1365,6 +1512,127 @@
                     <div class="flow-step"><div class="flow-box">Deliver to inbox / Slack</div></div>
                 </div>
                 <div class="wf-result">✦ 4 hrs/week returned to the owner · Actionable insights every Monday · Zero manual data pulling</div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<div class="glow-div"></div>
+
+<!-- ======================================================
+     PROJECTS
+====================================================== -->
+<section id="projects">
+    <div class="container">
+        <div style="margin-bottom:72px;">
+            <p class="eyebrow reveal">What I've Built</p>
+            <h2 class="sec-title reveal d1">Live <span class="acc">Projects</span></h2>
+            <p class="sec-sub reveal d2">
+                A selection of real products I've designed, built, and shipped — from AI automation
+                tools to full-stack apps and games.
+            </p>
+        </div>
+
+        <div class="proj-grid">
+
+            <!-- 1 — Beast Automation -->
+            <a href="https://sure-beast-automation.vercel.app" target="_blank" rel="noopener" class="proj-card tilt-card reveal">
+                <div class="proj-top">
+                    <span class="proj-tag">AI Agency · HTML/CSS/JS</span>
+                    <span class="proj-arrow">↗</span>
+                </div>
+                <div class="proj-icon">⚡</div>
+                <h3 class="proj-name">Beast Automation</h3>
+                <p class="proj-desc">AI automation agency website with 3D particle sphere, interactive cursor effects, and Calendly booking integration.</p>
+                <div class="proj-url">sure-beast-automation.vercel.app</div>
+            </a>
+
+            <!-- 2 — FMS Webinar -->
+            <a href="https://fms-webinars.vercel.app" target="_blank" rel="noopener" class="proj-card tilt-card reveal d1">
+                <div class="proj-top">
+                    <span class="proj-tag">Web App · Next.js + Supabase</span>
+                    <span class="proj-arrow">↗</span>
+                </div>
+                <div class="proj-icon">🎓</div>
+                <h3 class="proj-name">FMS Webinar Platform</h3>
+                <p class="proj-desc">Full-stack webinar booking and management platform built for FMS. Handles registrations, scheduling, and attendee management.</p>
+                <div class="proj-url">fms-webinars.vercel.app</div>
+            </a>
+
+            <!-- 3 — Heal Dental Clinic -->
+            <a href="https://prajwal-beast.github.io/Heal-Dental-Clinc/" target="_blank" rel="noopener" class="proj-card tilt-card reveal d2">
+                <div class="proj-top">
+                    <span class="proj-tag">Business Website · HTML/CSS/JS</span>
+                    <span class="proj-arrow">↗</span>
+                </div>
+                <div class="proj-icon">🦷</div>
+                <h3 class="proj-name">Heal Dental Clinic</h3>
+                <p class="proj-desc">Modern clinic website for a Kathmandu dental practice. GSAP animations, Google Maps integration, appointment booking, and 5★ review showcase.</p>
+                <div class="proj-url">prajwal-beast.github.io/Heal-Dental-Clinc</div>
+            </a>
+
+            <!-- 4 — DSEH Tutor -->
+            <a href="https://dseh-tutor.vercel.app" target="_blank" rel="noopener" class="proj-card tilt-card reveal d1">
+                <div class="proj-top">
+                    <span class="proj-tag">EdTech · TypeScript</span>
+                    <span class="proj-arrow">↗</span>
+                </div>
+                <div class="proj-icon">📚</div>
+                <h3 class="proj-name">DSEH Tutor</h3>
+                <p class="proj-desc">AI-powered tutoring platform for DSEH students. Personalized lesson delivery, progress tracking, and interactive study tools.</p>
+                <div class="proj-url">dseh-tutor.vercel.app</div>
+            </a>
+
+            <!-- 5 — Crude Oil Hub -->
+            <a href="https://oil-dashboard-seven.vercel.app" target="_blank" rel="noopener" class="proj-card tilt-card reveal d2">
+                <div class="proj-top">
+                    <span class="proj-tag">Dashboard · JavaScript</span>
+                    <span class="proj-arrow">↗</span>
+                </div>
+                <div class="proj-icon">🛢️</div>
+                <h3 class="proj-name">Crude Oil Hub</h3>
+                <p class="proj-desc">Real-time crude oil price dashboard tracking market data, geopolitical factors, and supply-demand indicators affecting global oil prices.</p>
+                <div class="proj-url">oil-dashboard-seven.vercel.app</div>
+            </a>
+
+            <!-- 6 — Email Marketing Analytics -->
+            <a href="https://app-eight-ebon-92.vercel.app" target="_blank" rel="noopener" class="proj-card tilt-card reveal d1">
+                <div class="proj-top">
+                    <span class="proj-tag">Analytics · Klaviyo + Shopify</span>
+                    <span class="proj-arrow">↗</span>
+                </div>
+                <div class="proj-icon">📊</div>
+                <h3 class="proj-name">Email Marketing Analytics</h3>
+                <p class="proj-desc">Unified analytics dashboard connecting Klaviyo email data with Shopify store performance. Revenue attribution, campaign tracking, and conversion insights.</p>
+                <div class="proj-url">app-eight-ebon-92.vercel.app</div>
+            </a>
+
+            <!-- 7 — Magic Sort -->
+            <a href="https://magic-sort-nu.vercel.app" target="_blank" rel="noopener" class="proj-card tilt-card reveal d2">
+                <div class="proj-top">
+                    <span class="proj-tag">Game · Flutter Web</span>
+                    <span class="proj-arrow">↗</span>
+                </div>
+                <div class="proj-icon">🧪</div>
+                <h3 class="proj-name">Magic Sort</h3>
+                <p class="proj-desc">Color-sorting liquid puzzle game built with Flutter. 60 levels from Easy to Expert, smooth pour animations, coins, daily streaks, and confetti win screens.</p>
+                <div class="proj-url">magic-sort-nu.vercel.app</div>
+            </a>
+
+            <!-- 8 — DalBhat Fit (Coming Soon) -->
+            <div class="proj-card proj-card--soon tilt-card reveal d1">
+                <div class="proj-top">
+                    <span class="proj-tag proj-tag--soon">🔨 Currently Building</span>
+                    <span class="proj-badge-soon">COMING SOON</span>
+                </div>
+                <div class="proj-icon">🍛</div>
+                <h3 class="proj-name">DalBhat Fit</h3>
+                <p class="proj-desc">Nepal-first diet &amp; fitness app built with Flutter + Supabase. Tracks dal bhat, momo, and local Nepali foods with calorie data, workout logging, and habit streaks.</p>
+                <div class="proj-wip">
+                    <span class="wip-dot"></span>
+                    Active development — Flutter + Supabase
+                </div>
             </div>
 
         </div>
