@@ -2546,5 +2546,565 @@ window.addEventListener('scroll', () => {
 <!-- ElevenLabs AI Voice Assistant -->
 <elevenlabs-convai agent-id="agent_2601kr63z4bsf6q97xzvhed15ajr"></elevenlabs-convai>
 <script src="https://elevenlabs.io/convai-widget/index.js" async type="text/javascript"></script>
+
+<!-- ============================================================
+     BEAST ASSISTANT — Smart Chat Widget
+============================================================ -->
+<style>
+/* ── Launcher button ── */
+#ba-launcher {
+    position:fixed; bottom:24px; right:24px; z-index:9998;
+    width:60px; height:60px; border-radius:50%;
+    background:linear-gradient(135deg,#00E0FF 0%,#A855F7 100%);
+    border:none; cursor:pointer;
+    box-shadow:0 0 0 0 rgba(0,224,255,.5);
+    animation:ba-pulse 2.6s ease-in-out infinite;
+    transition:transform .25s ease, box-shadow .25s ease;
+    display:flex; align-items:center; justify-content:center;
+}
+#ba-launcher:hover { transform:scale(1.1); }
+#ba-launcher svg { width:28px; height:28px; fill:none; }
+#ba-launcher .ba-close-icon { display:none; }
+#ba-launcher.open .ba-chat-icon { display:none; }
+#ba-launcher.open .ba-close-icon { display:block; }
+#ba-launcher.open { animation:none; box-shadow:0 0 28px rgba(0,224,255,.35); }
+@keyframes ba-pulse {
+    0%,100%{box-shadow:0 0 0 0 rgba(0,224,255,.45)}
+    50%{box-shadow:0 0 0 14px rgba(0,224,255,0)}
+}
+
+/* ── Notification badge ── */
+#ba-badge {
+    position:absolute; top:-4px; right:-4px;
+    width:18px; height:18px; border-radius:50%;
+    background:#F472B6; color:#fff; font-size:10px; font-weight:700;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Plus Jakarta Sans',sans-serif;
+    border:2px solid #030812;
+    animation:ba-badge-in .4s cubic-bezier(.34,1.56,.64,1) both;
+}
+@keyframes ba-badge-in { from{transform:scale(0)} to{transform:scale(1)} }
+
+/* ── Panel ── */
+#ba-panel {
+    position:fixed; bottom:96px; right:24px; z-index:9997;
+    width:min(380px, calc(100vw - 32px));
+    max-height:min(600px, calc(100vh - 120px));
+    background:#0B1628;
+    border:1px solid rgba(0,224,255,.18);
+    border-radius:20px;
+    box-shadow:0 24px 80px rgba(0,0,0,.55), 0 0 0 1px rgba(168,85,247,.1);
+    display:flex; flex-direction:column;
+    transform:translateY(24px) scale(.95); opacity:0;
+    pointer-events:none;
+    transition:transform .35s cubic-bezier(.34,1.2,.64,1), opacity .3s ease;
+    overflow:hidden;
+}
+#ba-panel.open {
+    transform:translateY(0) scale(1); opacity:1;
+    pointer-events:all;
+}
+
+/* ── Panel header ── */
+.ba-header {
+    padding:16px 18px;
+    background:linear-gradient(135deg,rgba(0,224,255,.08) 0%,rgba(168,85,247,.08) 100%);
+    border-bottom:1px solid rgba(255,255,255,.06);
+    display:flex; align-items:center; gap:12px;
+    flex-shrink:0;
+}
+.ba-avatar {
+    width:40px; height:40px; border-radius:50%;
+    background:linear-gradient(135deg,#00E0FF,#A855F7);
+    display:flex; align-items:center; justify-content:center;
+    font-size:18px; flex-shrink:0;
+    box-shadow:0 0 16px rgba(0,224,255,.3);
+}
+.ba-header-info { flex:1; min-width:0; }
+.ba-header-name { font-family:'Plus Jakarta Sans',sans-serif; font-size:14px; font-weight:700; color:#EEF4FF; }
+.ba-header-status { font-size:11px; color:#00E0FF; display:flex; align-items:center; gap:5px; }
+.ba-status-dot { width:6px; height:6px; border-radius:50%; background:#00E0FF; animation:ba-blink 1.8s ease-in-out infinite; }
+@keyframes ba-blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+.ba-header-book {
+    background:linear-gradient(135deg,#00E0FF,#A855F7);
+    border:none; border-radius:20px; padding:6px 14px;
+    font-family:'Plus Jakarta Sans',sans-serif; font-size:11px; font-weight:700;
+    color:#030812; cursor:pointer; white-space:nowrap;
+    transition:opacity .2s;
+}
+.ba-header-book:hover { opacity:.85; }
+
+/* ── Messages ── */
+.ba-msgs {
+    flex:1; overflow-y:auto; padding:16px;
+    display:flex; flex-direction:column; gap:10px;
+    scrollbar-width:thin; scrollbar-color:rgba(255,255,255,.08) transparent;
+}
+.ba-msg { display:flex; gap:8px; align-items:flex-end; max-width:88%; }
+.ba-msg.bot { align-self:flex-start; }
+.ba-msg.user { align-self:flex-end; flex-direction:row-reverse; }
+.ba-msg-av {
+    width:26px; height:26px; border-radius:50%; flex-shrink:0;
+    background:linear-gradient(135deg,#00E0FF,#A855F7);
+    display:flex; align-items:center; justify-content:center;
+    font-size:12px;
+}
+.ba-bubble {
+    padding:10px 14px; border-radius:16px;
+    font-family:'Plus Jakarta Sans',sans-serif; font-size:13.5px;
+    line-height:1.55; max-width:100%;
+}
+.ba-msg.bot .ba-bubble {
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.08);
+    color:#C8D8EC; border-bottom-left-radius:4px;
+}
+.ba-msg.user .ba-bubble {
+    background:linear-gradient(135deg,rgba(0,224,255,.18),rgba(168,85,247,.18));
+    border:1px solid rgba(0,224,255,.22);
+    color:#EEF4FF; border-bottom-right-radius:4px;
+}
+.ba-bubble a { color:#00E0FF; text-decoration:underline; }
+.ba-bubble strong { color:#EEF4FF; }
+
+/* ── Typing indicator ── */
+.ba-typing { display:flex; align-items:center; gap:4px; padding:10px 14px; }
+.ba-typing span {
+    width:7px; height:7px; border-radius:50%;
+    background:rgba(0,224,255,.5);
+    animation:ba-dot .9s ease-in-out infinite;
+}
+.ba-typing span:nth-child(2){animation-delay:.18s}
+.ba-typing span:nth-child(3){animation-delay:.36s}
+@keyframes ba-dot { 0%,80%,100%{transform:translateY(0);opacity:.4} 40%{transform:translateY(-6px);opacity:1} }
+
+/* ── Quick replies ── */
+.ba-chips { display:flex; flex-wrap:wrap; gap:6px; padding:0 16px 12px; flex-shrink:0; }
+.ba-chip {
+    background:rgba(0,224,255,.07); border:1px solid rgba(0,224,255,.2);
+    border-radius:20px; padding:6px 13px;
+    font-family:'Plus Jakarta Sans',sans-serif; font-size:11.5px; color:#00E0FF;
+    cursor:pointer; transition:background .2s, border-color .2s;
+    white-space:nowrap;
+}
+.ba-chip:hover { background:rgba(0,224,255,.15); border-color:rgba(0,224,255,.45); }
+
+/* ── Input area ── */
+.ba-input-row {
+    display:flex; align-items:center; gap:8px;
+    padding:12px 14px;
+    border-top:1px solid rgba(255,255,255,.06);
+    flex-shrink:0;
+}
+#ba-input {
+    flex:1; background:rgba(255,255,255,.05);
+    border:1px solid rgba(255,255,255,.1); border-radius:24px;
+    padding:9px 15px; color:#EEF4FF;
+    font-family:'Plus Jakarta Sans',sans-serif; font-size:13px;
+    outline:none; transition:border-color .2s;
+}
+#ba-input::placeholder { color:rgba(255,255,255,.3); }
+#ba-input:focus { border-color:rgba(0,224,255,.45); }
+#ba-send {
+    width:36px; height:36px; border-radius:50%; flex-shrink:0;
+    background:linear-gradient(135deg,#00E0FF,#A855F7);
+    border:none; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition:opacity .2s, transform .15s;
+}
+#ba-send:hover { opacity:.85; transform:scale(1.08); }
+#ba-send svg { width:15px; height:15px; fill:#030812; }
+
+/* ── Booking modal ── */
+#ba-booking-modal {
+    position:fixed; inset:0; z-index:10000;
+    background:rgba(3,8,18,.85); backdrop-filter:blur(8px);
+    display:flex; align-items:center; justify-content:center;
+    opacity:0; pointer-events:none;
+    transition:opacity .3s ease;
+}
+#ba-booking-modal.open { opacity:1; pointer-events:all; }
+.ba-modal-box {
+    background:#0B1628; border:1px solid rgba(0,224,255,.2);
+    border-radius:24px; overflow:hidden;
+    width:min(720px, calc(100vw - 32px));
+    max-height:calc(100vh - 48px);
+    display:flex; flex-direction:column;
+    box-shadow:0 32px 100px rgba(0,0,0,.6);
+    transform:scale(.94); transition:transform .35s cubic-bezier(.34,1.2,.64,1);
+}
+#ba-booking-modal.open .ba-modal-box { transform:scale(1); }
+.ba-modal-head {
+    padding:18px 22px; display:flex; align-items:center; gap:12px;
+    background:linear-gradient(135deg,rgba(0,224,255,.07),rgba(168,85,247,.07));
+    border-bottom:1px solid rgba(255,255,255,.06);
+    flex-shrink:0;
+}
+.ba-modal-title { flex:1; font-family:'Plus Jakarta Sans',sans-serif; font-size:15px; font-weight:700; color:#EEF4FF; }
+.ba-modal-sub { font-size:12px; color:#8FAAC4; margin-top:2px; }
+.ba-modal-close {
+    width:32px; height:32px; border-radius:50%;
+    background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.1);
+    color:#8FAAC4; font-size:18px; cursor:pointer; line-height:1;
+    display:flex; align-items:center; justify-content:center;
+    transition:background .2s, color .2s;
+}
+.ba-modal-close:hover { background:rgba(244,114,182,.15); color:#F472B6; }
+.ba-calendly-wrap {
+    flex:1; min-height:0;
+    overflow:hidden;
+}
+.ba-calendly-wrap .calendly-inline-widget {
+    height:100% !important;
+    min-height:500px;
+}
+
+@media(max-width:480px){
+    #ba-panel { bottom:84px; right:16px; }
+    #ba-launcher { bottom:16px; right:16px; }
+    .ba-modal-box { border-radius:16px; }
+    .ba-calendly-wrap .calendly-inline-widget { min-height:460px; }
+}
+</style>
+
+<!-- Launcher button -->
+<button id="ba-launcher" aria-label="Chat with Beast Assistant">
+    <span id="ba-badge">1</span>
+    <!-- Chat icon -->
+    <svg class="ba-chat-icon" viewBox="0 0 24 24" stroke="#030812" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+    </svg>
+    <!-- Close icon -->
+    <svg class="ba-close-icon" viewBox="0 0 24 24" stroke="#030812" stroke-width="2.5" stroke-linecap="round">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+    </svg>
+</button>
+
+<!-- Chat panel -->
+<div id="ba-panel" role="dialog" aria-label="Beast Assistant">
+    <div class="ba-header">
+        <div class="ba-avatar">🤖</div>
+        <div class="ba-header-info">
+            <div class="ba-header-name">Beast Assistant</div>
+            <div class="ba-header-status"><span class="ba-status-dot"></span>Online · Replies instantly</div>
+        </div>
+        <button class="ba-header-book" onclick="baOpenBooking()">📅 Book Call</button>
+    </div>
+    <div class="ba-msgs" id="ba-msgs"></div>
+    <div class="ba-chips" id="ba-chips"></div>
+    <div class="ba-input-row">
+        <input id="ba-input" type="text" placeholder="Ask me anything…" autocomplete="off" maxlength="300">
+        <button id="ba-send" aria-label="Send">
+            <svg viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+        </button>
+    </div>
+</div>
+
+<!-- Booking modal -->
+<div id="ba-booking-modal">
+    <div class="ba-modal-box">
+        <div class="ba-modal-head">
+            <div class="ba-avatar" style="background:linear-gradient(135deg,#00E0FF,#A855F7);">📅</div>
+            <div>
+                <div class="ba-modal-title">Book a Free Strategy Call</div>
+                <div class="ba-modal-sub">30 min · Prajwal Bista · Zoom / Google Meet</div>
+            </div>
+            <button class="ba-modal-close" onclick="baCloseBooking()" aria-label="Close">✕</button>
+        </div>
+        <div class="ba-calendly-wrap">
+            <div class="calendly-inline-widget"
+                 data-url="https://calendly.com/prajwalbeast22/30min?hide_gdpr_banner=1&background_color=060D1A&text_color=EEF4FF&primary_color=00E0FF"
+                 style="min-width:280px;height:560px;width:100%;">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+/* ============================================================
+   BEAST ASSISTANT — Knowledge Base & Chat Engine
+============================================================ */
+(function(){
+
+/* ---------- Knowledge base ---------- */
+const KB = [
+    /* Services */
+    {
+        keys:['service','offer','do','provide','help','build','create','what can','capabilities','speciali'],
+        answer:`Beast Automation offers **6 core services**:<br><br>
+🤖 <strong>AI Customer Support Agent</strong> — handles FAQs, bookings & escalations 24/7<br>
+🎯 <strong>Lead Capture & Nurture AI</strong> — qualifies leads and follows up automatically<br>
+📅 <strong>Appointment Booking Bot</strong> — syncs with your calendar, zero manual work<br>
+📊 <strong>AI Reporting Dashboards</strong> — automated daily/weekly business reports<br>
+⚙️ <strong>Custom Workflow Automation</strong> — replace any repetitive manual process<br>
+💬 <strong>WhatsApp / SMS Automation</strong> — reach customers where they already are<br><br>
+Want to know more about any of these, or book a free call?`
+    },
+    /* Pricing */
+    {
+        keys:['price','pricing','cost','charge','fee','rate','how much','expensive','afford','budget','quote','invest'],
+        answer:`Pricing depends on complexity, but here's a rough guide:<br><br>
+💰 <strong>Simple automation</strong> (1 workflow) — from <strong>$500 AUD / NPR 70,000</strong><br>
+💰 <strong>Full AI agent system</strong> — from <strong>$1,500–$4,000 AUD</strong><br>
+💰 <strong>Monthly retainer</strong> (ongoing optimization) — from <strong>$300 AUD/mo</strong><br><br>
+Every project gets a <strong>free strategy call</strong> first — no obligation. I scope exactly what you need so there are no surprises. Want to book one?`
+    },
+    /* Process / how it works */
+    {
+        keys:['process','how does it work','how it work','step','timeline','take','long','deliver','weeks','phase'],
+        answer:`Here's exactly how we work together:<br><br>
+<strong>01 · Discovery Call</strong> — 30 min to map your bottlenecks (free)<br>
+<strong>02 · Workflow Mapping</strong> — audit your tools & manual steps<br>
+<strong>03 · Design & Build</strong> — custom AI agents built with milestones you review<br>
+<strong>04 · Test & Iterate</strong> — stress-tested before going live<br>
+<strong>05 · Go Live + Optimize</strong> — deployed with monitoring<br><br>
+⏱ <strong>Simple automations:</strong> 1–2 weeks<br>
+⏱ <strong>Complex AI systems:</strong> 3–4 weeks<br><br>
+Ready to start? Book the free discovery call 👇`
+    },
+    /* Tech stack */
+    {
+        keys:['tech','stack','tool','platform','software','n8n','make','openai','zapier','technology','integrat'],
+        answer:`We build with the best automation & AI tools:<br><br>
+⚙️ <strong>Orchestration:</strong> n8n, Make (Integromat)<br>
+🧠 <strong>AI:</strong> OpenAI GPT-4o, Claude (Anthropic), Gemini<br>
+💬 <strong>Channels:</strong> WhatsApp Business API, Twilio SMS, Gmail<br>
+📦 <strong>CRMs / Data:</strong> HubSpot, Airtable, Google Sheets, Supabase<br>
+📅 <strong>Booking:</strong> Calendly, Google Calendar<br>
+🛒 <strong>E-commerce:</strong> Shopify, WooCommerce<br><br>
+We pick the stack that fits your existing setup — no forced migrations.`
+    },
+    /* Industries */
+    {
+        keys:['industry','dental','clinic','mortgage','real estate','restaurant','ecommerce','salon','pharmacy','who do you','vertical','niche','business type'],
+        answer:`We've built systems for several industries:<br><br>
+🦷 <strong>Dental Clinics</strong> — appointment bots, patient follow-ups<br>
+🏠 <strong>Mortgage Brokers</strong> — lead qualification AI, document chasing<br>
+🛒 <strong>E-commerce</strong> — support bots, returns automation, review requests<br>
+🍽️ <strong>Restaurants / Cafés</strong> — booking & enquiry automation<br>
+💼 <strong>Real Estate</strong> — lead nurture, inspection booking<br>
+💈 <strong>Salons & Spas</strong> — appointment & reminder bots<br><br>
+Not on the list? Most service businesses with repetitive processes are a perfect fit. Let's talk!`
+    },
+    /* Location / where */
+    {
+        keys:['where','location','based','country','australia','nepal','kathmandu','timezone','remote'],
+        answer:`Prajwal is based in <strong>Kathmandu, Nepal</strong> 🇳🇵<br><br>
+We serve businesses in <strong>Australia 🇦🇺</strong> and <strong>Nepal 🇳🇵</strong> primarily, but work remotely with clients worldwide. All calls happen via Zoom or Google Meet — timezone isn't a barrier.<br><br>
+<strong>Australia:</strong> AEST / AEDT covered<br>
+<strong>Nepal:</strong> NPT (UTC+5:45)`
+    },
+    /* Booking / meeting */
+    {
+        keys:['book','meeting','call','schedule','calendly','talk','consult','free call','strategy','appointment','discuss','chat with','speak'],
+        answer:`Awesome! Let's lock in a time 🎉<br><br>
+It's a <strong>free 30-minute strategy call</strong> with Prajwal. No hard sell — just a genuine conversation about your biggest operational headaches and whether automation can fix them.<br><br>
+Click the button below to pick a time that works for you 👇`,
+        action:'book'
+    },
+    /* Projects / portfolio */
+    {
+        keys:['project','portfolio','example','case study','work','built','sample','show me','past','previous','magic sort','dalbhat','heal dental','webinar','fms','websitefor'],
+        answer:`Here are some things Prajwal has built:<br><br>
+🦷 <strong>Heal Dental Clinic</strong> — full website with booking form (<a href="https://prajwal-beast.github.io/Heal-Dental-Clinc/" target="_blank">view live ↗</a>)<br>
+🎮 <strong>Magic Sort</strong> — Flutter color-sorting puzzle game (<a href="https://magic-sort-nu.vercel.app" target="_blank">play it ↗</a>)<br>
+🍛 <strong>DalBhat Fit</strong> — Nepal-first diet & fitness app (in development)<br>
+📧 <strong>WebsiteForMe Nepal</strong> — automated lead gen for Nepali businesses<br>
+🎓 <strong>FMS Webinar</strong> — event website for Faculty of Management Studies<br>
+🤖 <strong>Beast Automation</strong> — this website (built entirely with AI tools)<br><br>
+Want to see a specific type of project?`
+    },
+    /* Contact / reach */
+    {
+        keys:['contact','reach','email','phone','whatsapp','message','prajwal','number','instagram','linkedin','github','social'],
+        answer:`You can reach Prajwal directly:<br><br>
+📞 <strong>Phone/WhatsApp:</strong> <a href="https://wa.me/9779869375992" target="_blank">+977-9869375992</a><br>
+📧 <strong>Email:</strong> <a href="mailto:prajwalbeast22@gmail.com">prajwalbeast22@gmail.com</a><br>
+💼 <strong>LinkedIn:</strong> <a href="https://www.linkedin.com/in/prajwalbista" target="_blank">linkedin.com/in/prajwalbista</a><br>
+🐙 <strong>GitHub:</strong> <a href="https://github.com/Prajwal-Beast" target="_blank">Prajwal-Beast</a><br>
+📸 <strong>Instagram:</strong> <a href="https://www.instagram.com/beastautomation" target="_blank">@beastautomation</a><br><br>
+Or just book a free call — fastest way to get started!`
+    },
+    /* About Prajwal */
+    {
+        keys:['who','prajwal','founder','about','background','experience','story','person','team','built beast'],
+        answer:`<strong>Prajwal Bista</strong> is the founder of Beast Automation 🚀<br><br>
+Based in Kathmandu, Nepal, Prajwal is an AI automation engineer who helps businesses in Australia and Nepal replace repetitive manual work with intelligent AI systems.<br><br>
+He built Beast Automation after seeing how much time small teams waste on tasks that AI can handle in seconds — lead follow-ups, appointment booking, customer support, reporting.<br><br>
+Stack: n8n · Make · OpenAI · Claude · Flutter · Supabase · Vercel<br><br>
+Want to work with Prajwal directly? Book a free strategy call!`
+    },
+    /* Results / ROI */
+    {
+        keys:['result','roi','saving','save','benefit','value','worth','return','outcome','impact','proof','guarantee'],
+        answer:`Here's what clients typically see after automation:<br><br>
+⚡ <strong>Response time:</strong> Hours → Under 60 seconds (AI support agents)<br>
+📈 <strong>Lead conversion:</strong> +30–50% from instant follow-up automation<br>
+⏰ <strong>Time saved:</strong> 10–20 hrs/week per team member<br>
+💰 <strong>Cost:</strong> One AI agent costs less than a part-time hire<br>
+🎯 <strong>Zero dropped leads</strong> — every enquiry gets a response, every time<br><br>
+Results vary by business, but the free strategy call will show you exactly what's possible for <em>your</em> specific situation.`
+    },
+    /* Support / maintenance */
+    {
+        keys:['support','maintain','maintenance','after','ongoing','update','bug','break','fix','retainer','manage'],
+        answer:`Yes — Beast Automation offers <strong>ongoing support & optimization</strong>:<br><br>
+🔧 <strong>Post-launch support</strong> — 30 days of fixes included in every project<br>
+📋 <strong>Monthly retainer</strong> — from $300 AUD/mo for continuous improvements<br>
+🚨 <strong>Ad-hoc fixes</strong> — available for existing clients<br><br>
+AI systems need tuning as your business grows — we make sure they keep working perfectly. Want to discuss a maintenance plan?`
+    },
+    /* FAQ fallback — greeting */
+    {
+        keys:['hi','hello','hey','hiya','howdy','sup','yo','good morning','good afternoon','good evening'],
+        answer:`Hey there! 👋 I'm the <strong>Beast Assistant</strong>.<br><br>
+I can answer anything about Beast Automation — services, pricing, projects, process, or how AI automation could help your business.<br><br>
+Or if you're ready to chat with Prajwal directly, hit <strong>Book Call</strong> above! What would you like to know?`
+    },
+    /* Thanks */
+    {
+        keys:['thank','thanks','cheers','appreciate','great','awesome','perfect','nice','cool'],
+        answer:`You're welcome! 😊 Feel free to ask anything else, or <strong>book a free call</strong> with Prajwal to get started. He'd love to hear about your business.`
+    },
+];
+
+/* Quick reply chips shown initially */
+const INITIAL_CHIPS = [
+    { label:'💰 Pricing', q:'How much does it cost?' },
+    { label:'⚙️ Services', q:'What services do you offer?' },
+    { label:'📅 Book a Call', q:'I want to book a call' },
+    { label:'🏭 Industries', q:'What industries do you work with?' },
+    { label:'🔧 Tech Stack', q:'What tools do you use?' },
+    { label:'📂 Projects', q:'Show me your portfolio' },
+];
+
+/* ---------- DOM refs ---------- */
+const launcher = document.getElementById('ba-launcher');
+const panel    = document.getElementById('ba-panel');
+const msgs     = document.getElementById('ba-msgs');
+const chipsEl  = document.getElementById('ba-chips');
+const input    = document.getElementById('ba-input');
+const sendBtn  = document.getElementById('ba-send');
+const badge    = document.getElementById('ba-badge');
+const modal    = document.getElementById('ba-booking-modal');
+
+/* ---------- State ---------- */
+let open = false;
+
+/* ---------- Toggle panel ---------- */
+function togglePanel(){
+    open = !open;
+    panel.classList.toggle('open', open);
+    launcher.classList.toggle('open', open);
+    if(open){
+        if(badge) badge.remove();
+        if(msgs.childElementCount === 0) initChat();
+        setTimeout(()=> input.focus(), 350);
+    }
+}
+launcher.addEventListener('click', togglePanel);
+
+/* ---------- Init chat ---------- */
+function initChat(){
+    addMsg('bot', `Hi! 👋 I'm <strong>Beast Assistant</strong> — here to answer anything about Beast Automation.<br><br>Ask me about services, pricing, process, projects — or just say <strong>"book a call"</strong> to schedule time with Prajwal directly!`);
+    renderChips(INITIAL_CHIPS);
+}
+
+/* ---------- Render messages ---------- */
+function addMsg(role, html, action){
+    const wrap = document.createElement('div');
+    wrap.className = `ba-msg ${role}`;
+    if(role === 'bot'){
+        wrap.innerHTML = `<div class="ba-msg-av">🤖</div><div class="ba-bubble">${html}</div>`;
+        if(action === 'book'){
+            const btn = document.createElement('button');
+            btn.className = 'ba-header-book';
+            btn.style.cssText='margin-top:10px;display:block;font-size:12px;padding:8px 16px;';
+            btn.textContent = '📅 Pick a Time';
+            btn.onclick = baOpenBooking;
+            wrap.querySelector('.ba-bubble').appendChild(btn);
+        }
+    } else {
+        wrap.innerHTML = `<div class="ba-bubble">${html}</div>`;
+    }
+    msgs.appendChild(wrap);
+    msgs.scrollTop = msgs.scrollHeight;
+}
+
+function addTyping(){
+    const el = document.createElement('div');
+    el.className = 'ba-msg bot'; el.id = 'ba-typing-el';
+    el.innerHTML = `<div class="ba-msg-av">🤖</div><div class="ba-bubble ba-typing"><span></span><span></span><span></span></div>`;
+    msgs.appendChild(el);
+    msgs.scrollTop = msgs.scrollHeight;
+    return el;
+}
+function removeTyping(){ const el = document.getElementById('ba-typing-el'); if(el) el.remove(); }
+
+/* ---------- Quick reply chips ---------- */
+function renderChips(chips){
+    chipsEl.innerHTML = '';
+    chips.forEach(c => {
+        const btn = document.createElement('button');
+        btn.className = 'ba-chip';
+        btn.textContent = c.label;
+        btn.onclick = () => { chipsEl.innerHTML=''; handleUserMsg(c.q); };
+        chipsEl.appendChild(btn);
+    });
+}
+
+/* ---------- Find best KB match ---------- */
+function findAnswer(text){
+    const t = text.toLowerCase();
+    let best = null, bestScore = 0;
+    KB.forEach(item => {
+        const score = item.keys.filter(k => t.includes(k)).length;
+        if(score > bestScore){ bestScore = score; best = item; }
+    });
+    return bestScore > 0 ? best : null;
+}
+
+/* ---------- Handle user message ---------- */
+function handleUserMsg(text){
+    text = text.trim();
+    if(!text) return;
+    addMsg('user', text);
+    input.value = '';
+    const typing = addTyping();
+    setTimeout(()=>{
+        removeTyping();
+        const match = findAnswer(text);
+        if(match){
+            addMsg('bot', match.answer, match.action);
+        } else {
+            addMsg('bot', `Hmm, I'm not sure about that one! 🤔<br><br>For anything specific, the best move is to <strong>book a free call with Prajwal</strong> — he can answer anything directly.<br><br>Or try asking about: <em>services, pricing, process, portfolio, or contact details.</em>`, null);
+        }
+    }, 700 + Math.random()*400);
+}
+
+/* ---------- Send button & enter key ---------- */
+sendBtn.addEventListener('click', ()=> handleUserMsg(input.value));
+input.addEventListener('keydown', e => { if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); handleUserMsg(input.value); }});
+
+/* ---------- Booking modal ---------- */
+window.baOpenBooking = function(){
+    modal.classList.add('open');
+    document.body.style.overflow='hidden';
+    // init Calendly if not already
+    if(window.Calendly && modal.querySelector('.calendly-inline-widget:not(.calendly-loaded)')){
+        Calendly.initInlineWidget({ url:'https://calendly.com/prajwalbeast22/30min?hide_gdpr_banner=1&background_color=060D1A&text_color=EEF4FF&primary_color=00E0FF', parentElement: modal.querySelector('.calendly-inline-widget') });
+        modal.querySelector('.calendly-inline-widget').classList.add('calendly-loaded');
+    }
+};
+window.baCloseBooking = function(){
+    modal.classList.remove('open');
+    document.body.style.overflow='';
+};
+modal.addEventListener('click', e => { if(e.target===modal) baCloseBooking(); });
+document.addEventListener('keydown', e => { if(e.key==='Escape') baCloseBooking(); });
+
+})();
+</script>
+
 </body>
 </html>
