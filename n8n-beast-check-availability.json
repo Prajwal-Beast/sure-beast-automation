@@ -1,0 +1,98 @@
+{
+  "name": "Beast Assistant — Check Availability",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "beast-check-availability",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "a1b2c3d4-0001-0001-0001-000000000001",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "beast-check-availability"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Build date range: now → +7 days\nconst now = new Date();\nconst end = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);\nreturn [{ json: { startTime: now.toISOString(), endTime: end.toISOString() } }];"
+      },
+      "id": "a1b2c3d4-0001-0001-0001-000000000002",
+      "name": "Build Date Range",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.cal.com/v2/slots/available",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "Bearer cal_live_74b65e1796c7a2aa6b72965e9cb08234" },
+            { "name": "cal-api-version", "value": "2024-09-04" }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "eventTypeId", "value": "5541387" },
+            { "name": "startTime", "value": "={{ $json.startTime }}" },
+            { "name": "endTime", "value": "={{ $json.endTime }}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a1b2c3d4-0001-0001-0001-000000000003",
+      "name": "Get Available Slots",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $input.first().json;\nconst slots = response?.data?.slots || {};\n\nif (!slots || Object.keys(slots).length === 0) {\n  return [{ json: {\n    message: 'Prajwal has no available slots in the next 7 days. Please suggest the caller WhatsApp him directly at +977-9869375992 to arrange a time.'\n  }}];\n}\n\nconst lines = [];\nfor (const [date, times] of Object.entries(slots)) {\n  if (!times || times.length === 0) continue;\n  const dateObj = new Date(date + 'T00:00:00');\n  const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });\n  const timeStrings = times.slice(0, 5).map(t => {\n    const d = new Date(t.time);\n    return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Katmandu' });\n  });\n  lines.push(`${dayName}: ${timeStrings.join(', ')}`);\n}\n\nif (lines.length === 0) {\n  return [{ json: { message: 'No available slots found in the next 7 days. Ask the caller to WhatsApp Prajwal at +977-9869375992.' }}];\n}\n\nconst message = 'Here are Prajwal\\'s available slots over the next 7 days. ' + lines.join('. ') + '. Which time works best for you?';\n\nreturn [{ json: { message, slots: lines } }];"
+      },
+      "id": "a1b2c3d4-0001-0001-0001-000000000004",
+      "name": "Format Slots",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "a1b2c3d4-0001-0001-0001-000000000005",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1120, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{ "node": "Build Date Range", "type": "main", "index": 0 }]]
+    },
+    "Build Date Range": {
+      "main": [[{ "node": "Get Available Slots", "type": "main", "index": 0 }]]
+    },
+    "Get Available Slots": {
+      "main": [[{ "node": "Format Slots", "type": "main", "index": 0 }]]
+    },
+    "Format Slots": {
+      "main": [[{ "node": "Respond to Webhook", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-06-06T00:00:00.000Z",
+  "versionId": "1"
+}
